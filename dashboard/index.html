@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7fb">
+  <title>TaskForge · Task dashboard</title>
+  <link rel="stylesheet" href="/dashboard.css">
+  <script src="/dashboard.js" defer></script>
+</head>
+<body>
+  <svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-forge" viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-12h-7l1-8Z"/></symbol>
+    <symbol id="i-stack" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-run" viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-fail" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5m-4-3a7.5 7.5 0 0 1 12.4-3L20 9M4 15l2.6 3A7.5 7.5 0 0 0 19 15"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  </svg>
+
+  <header class="masthead">
+    <div class="shell masthead-inner">
+      <div class="brand"><span class="brand-icon"><svg><use href="#i-forge"/></svg></span>TaskForge</div>
+      <span id="connection" class="connection" data-mode="connecting" role="status"><span></span><b>Connecting</b></span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> OPERATIONS</p>
+        <h1 id="page-title">Task dashboard</h1>
+        <p>See what’s queued, running, or finished across your workers.</p>
+      </div>
+      <svg class="hero-art" viewBox="0 0 380 210" fill="none" aria-hidden="true">
+        <g stroke="#8880ff" stroke-width="1">
+          <path d="M270 0v38l-70 40v80l-70 40M340 0v78l-70 40v80M200 0v38l70 40v80l70 40M130 0v78l70 40v80M380 55l-40 23v80l-70 40M380 135l-40 23M200 38l-70 40m70 80-70-40M340 38l-70 40"/>
+          <path d="m200 78 70-40 70 40-70 40-70-40Zm0 0v80l70 40 70-40V78m-70 40v80" fill="#6857f5" fill-opacity=".14" stroke="#aca3ff"/>
+          <circle cx="270" cy="38" r="3" fill="#b0a7ff"/><circle cx="200" cy="158" r="3" fill="#b0a7ff"/><circle cx="340" cy="158" r="3" fill="#b0a7ff"/>
+        </g>
+      </svg>
+    </section>
+
+    <section class="metrics" aria-label="Task counts">
+      <div class="metric total"><span class="metric-icon"><svg><use href="#i-stack"/></svg></span><div><p>All tasks</p><strong data-count="all">—</strong></div></div>
+      <div class="metric queued"><span class="metric-icon"><svg><use href="#i-clock"/></svg></span><div><p>Queued</p><strong data-count="queued">—</strong></div></div>
+      <div class="metric running"><span class="metric-icon"><svg><use href="#i-run"/></svg></span><div><p>Running</p><strong data-count="running">—</strong></div></div>
+      <div class="metric succeeded"><span class="metric-icon"><svg><use href="#i-check"/></svg></span><div><p>Succeeded</p><strong data-count="succeeded">—</strong></div></div>
+      <div class="metric failed"><span class="metric-icon"><svg><use href="#i-fail"/></svg></span><div><p>Failed</p><strong data-count="failed">—</strong></div></div>
+    </section>
+
+    <section class="panel" aria-labelledby="jobs-title">
+      <div class="panel-heading">
+        <div><h2 id="jobs-title">Tasks</h2><p>Open a task to inspect its attempts and result.</p></div>
+        <button id="refresh" class="button" type="button"><svg><use href="#i-refresh"/></svg> Refresh</button>
+      </div>
+      <div class="toolbar">
+        <label class="search"><svg><use href="#i-search"/></svg><input id="search" type="search" aria-label="Search tasks" placeholder="Search by task name or ID"></label>
+        <label class="filter"><span>Status</span><select id="filter">
+          <option value="all">All statuses</option><option value="queued">Queued</option><option value="running">Running</option><option value="succeeded">Succeeded</option><option value="failed">Failed</option>
+        </select></label>
+      </div>
+      <p id="sync-error" class="sync-error" role="status" hidden></p>
+      <div class="table-wrap">
+        <table id="table" hidden>
+          <thead><tr><th scope="col">Task / Job ID</th><th scope="col">Status</th><th scope="col">Attempts</th><th scope="col">Submitted</th></tr></thead>
+          <tbody id="jobs"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty">
+        <span class="empty-icon"><svg><use href="#i-stack"/></svg></span>
+        <h3 id="empty-title">Loading tasks…</h3>
+        <p id="empty-copy">Connecting to the TaskForge master.</p>
+        <code id="empty-example" hidden>cargo run -- submit square 12</code>
+      </div>
+      <footer class="panel-footer"><span id="visible-count">—</span><span id="last-update">Updates every 2 seconds</span></footer>
+    </section>
+  </main>
+
+  <dialog id="details" aria-labelledby="detail-title">
+    <div class="detail-header">
+      <div><p class="detail-label">TASK DETAILS</p><h2 id="detail-title"></h2></div>
+      <form method="dialog"><button class="button close" aria-label="Close task details"><svg><use href="#i-close"/></svg></button></form>
+    </div>
+    <p id="detail-id" class="detail-id"></p>
+    <dl class="detail-meta">
+      <div><dt>Status</dt><dd id="detail-status"></dd></div>
+      <div><dt>Attempts</dt><dd id="detail-attempts"></dd></div>
+      <div><dt>Submitted</dt><dd id="detail-submitted"></dd></div>
+    </dl>
+    <h3 id="detail-result-title">Result</h3>
+    <pre id="detail-result"></pre>
+  </dialog>
+</body>
+</html>
