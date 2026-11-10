@@ -16,6 +16,26 @@ pub(crate) const fn default_max_attempts() -> u32 {
     3
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SubmitWorkflow {
+    pub first: SubmitJob,
+    pub second: WorkflowStep,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct WorkflowStep {
+    pub task: String,
+    #[serde(default = "default_max_attempts")]
+    pub max_attempts: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct WorkflowStatus {
+    pub id: Uuid,
+    pub first: JobStatus,
+    pub second: JobStatus,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct JobStatus {
     pub id: Uuid,
@@ -31,6 +51,8 @@ pub struct JobStatus {
 pub enum JobState {
     Queued,
     Running,
+    Waiting,
+    Blocked { error: String },
     Succeeded { output: Value },
     Failed { error: String },
 }
@@ -44,6 +66,8 @@ pub(crate) struct Assignment {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(crate) struct Poll {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     pub capacity: usize,
     pub tasks: HashSet<String>,
     pub active: HashSet<Uuid>,

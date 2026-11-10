@@ -53,6 +53,7 @@ pub struct Worker {
     client: Client,
     registry: Arc<TaskRegistry>,
     capacity: NonZeroUsize,
+    name: Option<String>,
 }
 
 impl Worker {
@@ -61,7 +62,13 @@ impl Worker {
             client,
             registry: Arc::new(registry),
             capacity,
+            name: None,
         }
+    }
+
+    pub fn with_name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
     }
 
     /// Polls once per second, reporting running and completed attempts on each poll.
@@ -71,7 +78,9 @@ impl Worker {
             "register at least one task before starting"
         );
         let worker_id = Uuid::new_v4();
+        eprintln!("TaskForge worker ID: {worker_id}");
         let mut poll = Poll {
+            name: self.name,
             capacity: self.capacity.get(),
             tasks: self.registry.handlers.keys().cloned().collect(),
             active: HashSet::new(),

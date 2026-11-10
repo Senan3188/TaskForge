@@ -1,0 +1,12 @@
+FROM rust:1.98-bookworm AS build
+WORKDIR /build
+COPY Cargo.toml Cargo.lock README.md ./
+COPY src/ src/
+COPY dashboard/ dashboard/
+RUN cargo build --release --locked --bin taskforge
+
+FROM debian:bookworm-slim
+COPY --from=build /build/target/release/taskforge /usr/local/bin/taskforge
+USER 10001:10001
+ENTRYPOINT ["taskforge", "worker"]
+CMD ["--master", "http://taskforge-master:7878"]

@@ -9,7 +9,7 @@ use hyper_util::rt::TokioExecutor;
 use serde::{Serialize, de::DeserializeOwned};
 use uuid::Uuid;
 
-use crate::protocol::{Assignment, JobStatus, Poll, SubmitJob};
+use crate::protocol::{Assignment, JobStatus, Poll, SubmitJob, SubmitWorkflow, WorkflowStatus};
 
 /// An HTTP client for a TaskForge master.
 #[derive(Clone)]
@@ -41,6 +41,16 @@ impl Client {
 
     pub async fn status(&self, id: Uuid) -> Result<JobStatus> {
         self.request(Method::GET, &format!("/v1/jobs/{id}"), None::<&()>)
+            .await
+    }
+
+    pub async fn submit_workflow(&self, workflow: &SubmitWorkflow) -> Result<WorkflowStatus> {
+        self.request(Method::POST, "/v1/workflows", Some(workflow))
+            .await
+    }
+
+    pub async fn workflow_status(&self, id: Uuid) -> Result<WorkflowStatus> {
+        self.request(Method::GET, &format!("/v1/workflows/{id}"), None::<&()>)
             .await
     }
 
